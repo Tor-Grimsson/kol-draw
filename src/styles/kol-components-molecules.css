@@ -1,0 +1,255 @@
+/**
+ * KOL components — molecule tier
+ *
+ * Pill / Tag / Badge — three pill-shaped status / label molecules with
+ * overlapping use cases. Future consolidation candidate (see
+ * docs/kol-migration/components/02-components-molecules.md §6 / §7).
+ * For now they ship with their original CSS surface, just relocated
+ * out of the kol-components.css kitchen sink.
+ *
+ * ─────────────────────────────────────────────────────────────────────
+ * Pill — molecules/Pill.jsx
+ *   Variants: outline / subtle / inverse
+ *   Sizes:    sm / md / lg
+ * ─────────────────────────────────────────────────────────────────────
+ */
+
+/* Popover — default chrome for floating-ui-positioned panels.
+ * Used by molecules/Popover.jsx PopoverPanel. */
+.kol-popover {
+  background: var(--kol-surface-secondary);
+  border: 1px solid var(--kol-fg-08);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4),
+              0 2px 6px -2px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  outline: none;
+}
+
+/* Tooltip — hover-triggered text label with optional kbd-style shortcut chip.
+ * Used by molecules/Popover.jsx Tooltip. No border (intentionally distinct
+ * from native browser tooltips); shortcut renders as a fg-tinted chip. */
+.kol-tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--kol-surface-secondary);
+  border-radius: 6px;
+  padding: 4px 4px 4px 8px;
+  font-family: var(--kol-font-family-mono);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.5);
+}
+
+.kol-tooltip-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--kol-fg-08);
+  border-radius: 3px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--kol-surface-on-primary);
+}
+
+.pill-inverse {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border-radius: var(--kol-radius-full);
+  background-color: var(--kol-surface-on-primary);
+  font-family: var(--kol-font-family-mono);
+  color: var(--kol-surface-primary);
+  border: none;
+}
+
+.pill-subtle {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border-radius: var(--kol-radius-full);
+  background-color: color-mix(in srgb, var(--kol-surface-on-primary) 16%, transparent);
+  font-family: var(--kol-font-family-mono);
+  color: var(--kol-surface-on-primary);
+  border: 1px solid transparent;
+}
+
+.pill-outline {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border-radius: var(--kol-radius-full);
+  background-color: var(--kol-surface-primary);
+  font-family: var(--kol-font-family-mono);
+  color: var(--kol-surface-on-primary);
+  border: 1px solid var(--kol-border-default);
+}
+
+.pill-sm {
+  font-size: 10px;
+  font-weight: 470;
+  padding: 2px 10px;
+}
+
+.pill-md {
+  font-size: 12px;
+  font-weight: 470;
+  padding: 4px 16px;
+}
+
+.pill-lg {
+  font-size: 14px;
+  font-weight: 470;
+  padding: 6px 20px;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Tag — molecules/Tag.jsx
+ *   .tag-control / -sm / -md / -lg
+ *   .control-unified-inverse  (inverse variant — ad-hoc legacy naming)
+ * ───────────────────────────────────────────────────────────────────── */
+
+.tag-control {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border-radius: var(--kol-radius-full);
+  background-color: var(--kol-surface-primary);
+  font-size: 10px;
+  font-weight: 400;
+  font-family: var(--kol-font-family-mono);
+  color: var(--kol-surface-on-primary);
+  border: 1px solid var(--kol-border-default);
+  transition: background-color var(--kol-transition-base),
+              color var(--kol-transition-base);
+}
+
+.tag-control:hover {
+  background-color: color-mix(in srgb, var(--kol-surface-on-primary) 24%, transparent);
+  color: var(--kol-surface-on-primary);
+  border-color: transparent;
+}
+
+.tag-control.is-active {
+  background-color: color-mix(in srgb, var(--kol-surface-on-primary) 24%, transparent);
+  color: var(--kol-surface-on-primary);
+  border-color: color-mix(in srgb, var(--kol-surface-on-primary) 24%, transparent);
+}
+
+.tag-sm { font-size: 10px; font-weight: 470; padding: 4px 10px; }
+.tag-md { font-size: 12px; font-weight: 470; padding: 5px 12px; }
+.tag-lg { font-size: 14px; font-weight: 470; padding: 6px 14px; }
+
+.control-unified-inverse {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 0;
+  border-radius: var(--kol-radius-full);
+  background-color: var(--kol-surface-on-primary);
+  color: var(--kol-surface-primary);
+  border: 1px solid transparent;
+  transition: background-color var(--kol-transition-base),
+              color var(--kol-transition-base);
+}
+
+.control-unified-inverse:hover {
+  background-color: var(--kol-surface-primary);
+  color: var(--kol-surface-on-primary);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Badge — molecules/Badge.jsx
+ *   8 variants: default / secondary / destructive / outline / success /
+ *               warning / critical / info
+ *   3 sizes:    sm / md / lg
+ *
+ * Note: status colors (destructive / success / warning / critical / info)
+ * use literal hex; could migrate to --ui-error / --ui-warning / etc.
+ * tokens in a future pass.
+ * ───────────────────────────────────────────────────────────────────── */
+
+.kol-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-family: var(--kol-font-family-mono);
+  font-weight: 470;
+  transition: background-color var(--kol-transition-base),
+              color var(--kol-transition-base);
+}
+
+.kol-badge-default {
+  background-color: var(--kol-surface-on-primary);
+  color: var(--kol-surface-primary);
+  border: 1px solid transparent;
+}
+
+.kol-badge-secondary {
+  background-color: color-mix(in srgb, var(--kol-surface-on-primary) 12%, transparent);
+  color: var(--kol-surface-on-primary);
+  border: 1px solid transparent;
+}
+
+.kol-badge-destructive {
+  background-color: color-mix(in srgb, #ef4444 20%, transparent);
+  color: #ef4444;
+  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+}
+
+.kol-badge-outline {
+  background-color: transparent;
+  color: var(--kol-surface-on-primary);
+  border: 1px solid var(--kol-border-default);
+}
+
+.kol-badge-success {
+  background-color: color-mix(in srgb, #22c55e 20%, transparent);
+  color: #22c55e;
+  border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+}
+
+.kol-badge-warning {
+  background-color: color-mix(in srgb, #eab308 20%, transparent);
+  color: #eab308;
+  border: 1px solid color-mix(in srgb, #eab308 30%, transparent);
+}
+
+.kol-badge-critical {
+  background-color: color-mix(in srgb, #ef4444 20%, transparent);
+  color: #ef4444;
+  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+}
+
+.kol-badge-info {
+  background-color: color-mix(in srgb, #3b82f6 20%, transparent);
+  color: #3b82f6;
+  border: 1px solid color-mix(in srgb, #3b82f6 30%, transparent);
+}
+
+.kol-badge-sm {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 10px;
+}
+
+.kol-badge-md {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.kol-badge-lg {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 14px;
+}

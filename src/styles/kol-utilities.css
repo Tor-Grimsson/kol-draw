@@ -1,0 +1,92 @@
+/**
+ * KOL Utilities — generic helper classes.
+ *
+ * Curated from kol-theme/_new-css/utilities.css during Phase 5 sync. Dropped:
+ *  - bg-opacity-hex-* / hover:bg-opacity-hex-* / inverse-* family (~600 lines)
+ *    The --kol-opacity-hex-* tokens were retired in kol-client Phase 4a and
+ *    consolidated into the color-mix-based --kol-fg-* family in kol-opacity.css.
+ *  - .reveal* family ([data-reveal] is the canonical reveal pattern in
+ *    kol-client; shipping a parallel .reveal API would create drift)
+ *  - wordmarkBrand / logomarkBrand filter utilities (proposal-specific
+ *    brand chrome, not DS scope)
+ */
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Responsive page padding — standard horizontal inset for route pages. */
+.breakpoint-padding {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 768px) {
+  .breakpoint-padding {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .breakpoint-padding {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Screen-reader-only — hide visually but keep accessible. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Fullbleed — escape parent container to span viewport edge-to-edge.
+   Extracted from kol-site.css during Phase 4b unwind.
+   Used by landing-tier sections that span 100vw regardless of column shell. */
+.fullbleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+/* Cap-baseline trim — crops the line box to cap-height top + alphabetic
+ * baseline bottom. Modern primitive for tight UI labels (Button, Toggle,
+ * Dropdown text) where vertical centering matters more than ascender /
+ * descender room. Replaces the `line-height: 100%` hack with explicit metrics.
+ *
+ * Browser support: Chrome 133+, Safari 18.2+. Firefox not yet — falls back to
+ * default line-box behavior, no visual break. Opt-in only; do not blanket-apply. */
+.text-trim {
+  text-box-trim: trim-start trim-end;
+  text-box-edge: cap alphabetic;
+}
+
+/* Suppress native number-input spinner arrows. Apply to <input type="number">
+ * when a custom Stepper renders chevron buttons instead. */
+.hide-number-spinners::-webkit-inner-spin-button,
+.hide-number-spinners::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.hide-number-spinners {
+  -moz-appearance: textfield;
+}

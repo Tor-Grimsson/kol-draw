@@ -1,0 +1,369 @@
+/**
+ * kol-opacity.css — Foreground opacity system (KOL tier)
+ *
+ * Single source of truth for the fg opacity scale. Consolidates what used to be
+ * scattered across kol-color-simple.css and framework/app.css.
+ *
+ * Scale: 01, 02, 04, 08, 12, 16, 24, 32, 40, 48, 64, 80, 88, 96 (14 stops)
+ *
+ * Tier pairs:
+ * - Standard (foreground on primary surface — var(--kol-surface-on-primary))
+ * - Inverse  (foreground on inverse surface — var(--kol-surface-on-inverse))
+ *
+ * Layers:
+ * - Tokens (--kol-fg-*, --kol-fg-inverse-*) for use in CSS rules
+ *   (pseudo-elements, animations, gradients, descendant selectors)
+ * - Classes (.bg-fg-*, .text-fg-*, .border-fg-* + inverse + hover) for JSX
+ *
+ * Every color-mix expression uses `var(<token>, currentColor)` — fallback is
+ * load-bearing for SVG theming where the element's `color:` is the active paint.
+ *
+ * Semantic text role classes (.text-emphasis/lede/body/meta/subtle) live here
+ * too — they map directly to the fg-* primitives below, no intermediate alias
+ * tokens. Single source of truth per opacity stop.
+ */
+
+:root {
+  /* ============================================================================
+   * TOKENS — Standard tier (foreground on primary surface)
+   * ============================================================================ */
+
+  --kol-fg-01: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent);
+  --kol-fg-02: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent);
+  --kol-fg-04: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent);
+  --kol-fg-08: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent);
+  --kol-fg-12: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent);
+  --kol-fg-16: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent);
+  --kol-fg-24: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent);
+  --kol-fg-32: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent);
+  --kol-fg-40: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent);
+  --kol-fg-48: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent);
+  --kol-fg-64: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent);
+  --kol-fg-80: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent);
+  --kol-fg-88: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent);
+  --kol-fg-96: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent);
+
+  /* ============================================================================
+   * TOKENS — Absolute tier (theme-independent black, fixed opacity stops)
+   * ============================================================================ */
+
+  --kol-fg-absolute-01: color-mix(in srgb, var(--kol-color-absolute-black) 1%, transparent);
+  --kol-fg-absolute-02: color-mix(in srgb, var(--kol-color-absolute-black) 2%, transparent);
+  --kol-fg-absolute-04: color-mix(in srgb, var(--kol-color-absolute-black) 4%, transparent);
+  --kol-fg-absolute-08: color-mix(in srgb, var(--kol-color-absolute-black) 8%, transparent);
+  --kol-fg-absolute-12: color-mix(in srgb, var(--kol-color-absolute-black) 12%, transparent);
+  --kol-fg-absolute-16: color-mix(in srgb, var(--kol-color-absolute-black) 16%, transparent);
+  --kol-fg-absolute-24: color-mix(in srgb, var(--kol-color-absolute-black) 24%, transparent);
+  --kol-fg-absolute-32: color-mix(in srgb, var(--kol-color-absolute-black) 32%, transparent);
+  --kol-fg-absolute-40: color-mix(in srgb, var(--kol-color-absolute-black) 40%, transparent);
+  --kol-fg-absolute-48: color-mix(in srgb, var(--kol-color-absolute-black) 48%, transparent);
+  --kol-fg-absolute-64: color-mix(in srgb, var(--kol-color-absolute-black) 64%, transparent);
+  --kol-fg-absolute-80: color-mix(in srgb, var(--kol-color-absolute-black) 80%, transparent);
+  --kol-fg-absolute-88: color-mix(in srgb, var(--kol-color-absolute-black) 88%, transparent);
+  --kol-fg-absolute-96: color-mix(in srgb, var(--kol-color-absolute-black) 96%, transparent);
+
+  /* ============================================================================
+   * TOKENS — Inverse tier (foreground on inverse surface)
+   * ============================================================================ */
+
+  --kol-fg-inverse-01: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent);
+  --kol-fg-inverse-02: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent);
+  --kol-fg-inverse-04: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent);
+  --kol-fg-inverse-08: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent);
+  --kol-fg-inverse-12: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent);
+  --kol-fg-inverse-16: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent);
+  --kol-fg-inverse-24: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent);
+  --kol-fg-inverse-32: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent);
+  --kol-fg-inverse-40: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent);
+  --kol-fg-inverse-48: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent);
+  --kol-fg-inverse-64: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent);
+  --kol-fg-inverse-80: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent);
+  --kol-fg-inverse-88: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent);
+  --kol-fg-inverse-96: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent);
+
+  /* Semantic text roles map directly to fg-* primitives via the .text-* role
+   * classes below — no intermediate alias tokens. */
+}
+
+/* ==============================================================================
+ * CLASSES — Base (no stop, 100% opacity)
+ * ============================================================================== */
+
+.bg-fg           { background-color: var(--kol-surface-on-primary, currentColor); }
+.bg-fg-inverse   { background-color: var(--kol-surface-on-inverse, currentColor); }
+
+.text-fg         { color: var(--kol-surface-on-primary, currentColor); }
+.text-fg-inverse { color: var(--kol-surface-on-inverse, currentColor); }
+
+.border-fg         { border-color: var(--kol-surface-on-primary, currentColor); }
+.border-fg-inverse { border-color: var(--kol-surface-on-inverse, currentColor); }
+
+/* ==============================================================================
+ * CLASSES — Background opacity (standard tier)
+ * ============================================================================== */
+
+.bg-fg-01 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.bg-fg-02 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.bg-fg-04 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.bg-fg-08 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.bg-fg-12 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.bg-fg-16 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.bg-fg-24 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.bg-fg-32 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.bg-fg-40 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.bg-fg-48 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.bg-fg-64 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.bg-fg-80 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.bg-fg-88 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.bg-fg-96 { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Background opacity (inverse tier)
+ * ============================================================================== */
+
+.bg-fg-inverse-01 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.bg-fg-inverse-02 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.bg-fg-inverse-04 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.bg-fg-inverse-08 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.bg-fg-inverse-12 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.bg-fg-inverse-16 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.bg-fg-inverse-24 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.bg-fg-inverse-32 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.bg-fg-inverse-40 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.bg-fg-inverse-48 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.bg-fg-inverse-64 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.bg-fg-inverse-80 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.bg-fg-inverse-88 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.bg-fg-inverse-96 { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Background opacity (absolute tier — fixed black, theme-independent)
+ * ============================================================================== */
+
+.bg-fg-absolute-01 { background-color: var(--kol-fg-absolute-01); }
+.bg-fg-absolute-02 { background-color: var(--kol-fg-absolute-02); }
+.bg-fg-absolute-04 { background-color: var(--kol-fg-absolute-04); }
+.bg-fg-absolute-08 { background-color: var(--kol-fg-absolute-08); }
+.bg-fg-absolute-12 { background-color: var(--kol-fg-absolute-12); }
+.bg-fg-absolute-16 { background-color: var(--kol-fg-absolute-16); }
+.bg-fg-absolute-24 { background-color: var(--kol-fg-absolute-24); }
+.bg-fg-absolute-32 { background-color: var(--kol-fg-absolute-32); }
+.bg-fg-absolute-40 { background-color: var(--kol-fg-absolute-40); }
+.bg-fg-absolute-48 { background-color: var(--kol-fg-absolute-48); }
+.bg-fg-absolute-64 { background-color: var(--kol-fg-absolute-64); }
+.bg-fg-absolute-80 { background-color: var(--kol-fg-absolute-80); }
+.bg-fg-absolute-88 { background-color: var(--kol-fg-absolute-88); }
+.bg-fg-absolute-96 { background-color: var(--kol-fg-absolute-96); }
+
+/* ==============================================================================
+ * CLASSES — Background hover (standard + inverse)
+ * ============================================================================== */
+
+.hover\:bg-fg-01:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.hover\:bg-fg-02:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.hover\:bg-fg-04:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.hover\:bg-fg-08:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.hover\:bg-fg-12:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.hover\:bg-fg-16:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.hover\:bg-fg-24:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.hover\:bg-fg-32:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.hover\:bg-fg-40:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.hover\:bg-fg-48:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.hover\:bg-fg-64:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.hover\:bg-fg-80:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.hover\:bg-fg-88:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.hover\:bg-fg-96:hover { background-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+.hover\:bg-fg-inverse-01:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.hover\:bg-fg-inverse-02:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.hover\:bg-fg-inverse-04:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.hover\:bg-fg-inverse-08:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.hover\:bg-fg-inverse-12:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.hover\:bg-fg-inverse-16:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.hover\:bg-fg-inverse-24:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.hover\:bg-fg-inverse-32:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.hover\:bg-fg-inverse-40:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.hover\:bg-fg-inverse-48:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.hover\:bg-fg-inverse-64:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.hover\:bg-fg-inverse-80:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.hover\:bg-fg-inverse-88:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.hover\:bg-fg-inverse-96:hover { background-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Text opacity (standard + inverse)
+ * ============================================================================== */
+
+.text-fg-01 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.text-fg-02 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.text-fg-04 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.text-fg-08 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.text-fg-12 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.text-fg-16 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.text-fg-24 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.text-fg-32 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.text-fg-40 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.text-fg-48 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.text-fg-64 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.text-fg-80 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.text-fg-88 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.text-fg-96 { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+.text-fg-inverse-01 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.text-fg-inverse-02 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.text-fg-inverse-04 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.text-fg-inverse-08 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.text-fg-inverse-12 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.text-fg-inverse-16 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.text-fg-inverse-24 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.text-fg-inverse-32 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.text-fg-inverse-40 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.text-fg-inverse-48 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.text-fg-inverse-64 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.text-fg-inverse-80 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.text-fg-inverse-88 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.text-fg-inverse-96 { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Text hover (standard + inverse)
+ * ============================================================================== */
+
+.hover\:text-fg-01:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.hover\:text-fg-02:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.hover\:text-fg-04:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.hover\:text-fg-08:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.hover\:text-fg-12:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.hover\:text-fg-16:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.hover\:text-fg-24:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.hover\:text-fg-32:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.hover\:text-fg-40:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.hover\:text-fg-48:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.hover\:text-fg-64:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.hover\:text-fg-80:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.hover\:text-fg-88:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.hover\:text-fg-96:hover { color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+.hover\:text-fg-inverse-01:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.hover\:text-fg-inverse-02:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.hover\:text-fg-inverse-04:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.hover\:text-fg-inverse-08:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.hover\:text-fg-inverse-12:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.hover\:text-fg-inverse-16:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.hover\:text-fg-inverse-24:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.hover\:text-fg-inverse-32:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.hover\:text-fg-inverse-40:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.hover\:text-fg-inverse-48:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.hover\:text-fg-inverse-64:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.hover\:text-fg-inverse-80:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.hover\:text-fg-inverse-88:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.hover\:text-fg-inverse-96:hover { color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Border opacity (standard + inverse)
+ * ============================================================================== */
+
+.border-fg-01 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.border-fg-02 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.border-fg-04 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.border-fg-08 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.border-fg-12 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.border-fg-16 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.border-fg-24 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.border-fg-32 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.border-fg-40 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.border-fg-48 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.border-fg-64 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.border-fg-80 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.border-fg-88 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.border-fg-96 { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+.border-fg-inverse-01 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.border-fg-inverse-02 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.border-fg-inverse-04 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.border-fg-inverse-08 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.border-fg-inverse-12 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.border-fg-inverse-16 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.border-fg-inverse-24 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.border-fg-inverse-32 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.border-fg-inverse-40 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.border-fg-inverse-48 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.border-fg-inverse-64 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.border-fg-inverse-80 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.border-fg-inverse-88 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.border-fg-inverse-96 { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * CLASSES — Border hover (standard + inverse)
+ * ============================================================================== */
+
+.hover\:border-fg-01:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 1%, transparent); }
+.hover\:border-fg-02:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 2%, transparent); }
+.hover\:border-fg-04:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 4%, transparent); }
+.hover\:border-fg-08:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 8%, transparent); }
+.hover\:border-fg-12:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 12%, transparent); }
+.hover\:border-fg-16:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 16%, transparent); }
+.hover\:border-fg-24:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 24%, transparent); }
+.hover\:border-fg-32:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 32%, transparent); }
+.hover\:border-fg-40:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 40%, transparent); }
+.hover\:border-fg-48:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 48%, transparent); }
+.hover\:border-fg-64:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 64%, transparent); }
+.hover\:border-fg-80:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 80%, transparent); }
+.hover\:border-fg-88:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 88%, transparent); }
+.hover\:border-fg-96:hover { border-color: color-mix(in srgb, var(--kol-surface-on-primary, currentColor) 96%, transparent); }
+
+.hover\:border-fg-inverse-01:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 1%, transparent); }
+.hover\:border-fg-inverse-02:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 2%, transparent); }
+.hover\:border-fg-inverse-04:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 4%, transparent); }
+.hover\:border-fg-inverse-08:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 8%, transparent); }
+.hover\:border-fg-inverse-12:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 12%, transparent); }
+.hover\:border-fg-inverse-16:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 16%, transparent); }
+.hover\:border-fg-inverse-24:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 24%, transparent); }
+.hover\:border-fg-inverse-32:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 32%, transparent); }
+.hover\:border-fg-inverse-40:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 40%, transparent); }
+.hover\:border-fg-inverse-48:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 48%, transparent); }
+.hover\:border-fg-inverse-64:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 64%, transparent); }
+.hover\:border-fg-inverse-80:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 80%, transparent); }
+.hover\:border-fg-inverse-88:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 88%, transparent); }
+.hover\:border-fg-inverse-96:hover { border-color: color-mix(in srgb, var(--kol-surface-on-inverse, currentColor) 96%, transparent); }
+
+/* ==============================================================================
+ * SEMANTIC OPACITY DESCRIPTORS
+ *
+ * Six-stop hierarchy: subtle / mute / meta / body / strong / emphasis. Each
+ * stop is a token (--kol-fg-*) and a class family (text-*, bg-*, border-*,
+ * ring-*) so the same descriptor names work across every property.
+ *
+ * Stops:
+ *   subtle    24% — dividers, disabled hints, faintest visible
+ *   mute      32% — dim labels, quiet UI hints
+ *   meta      48% — labels, eyebrows, captions  (current text-meta workhorse)
+ *   body      64% — running copy, links         (current text-body default)
+ *   strong    80% — emphasized body, <strong>   (renamed from text-lede)
+ *   emphasis 100% — headings, max ink            (current text-emphasis)
+ *
+ * Tokens chain through the existing fg-opacity ramp — single source of truth
+ * (the 14-stop --kol-fg-{01..96} family) is preserved; descriptors are aliases.
+ * ============================================================================== */
+
+:root {
+  --kol-fg-subtle:    var(--kol-fg-24);
+  --kol-fg-meta:      var(--kol-fg-48);
+  --kol-fg-body:      var(--kol-fg-64);
+  --kol-fg-strong:    var(--kol-fg-80);
+  --kol-fg-emphasis:  var(--kol-surface-on-primary);
+}
+
+/* ─── Text descriptors (5 stops — `mute` retired 2026-04-30, 0 consumers).
+ *     bg-* / border-* / ring-* descriptor families dropped same date —
+ *     consumers reach for numeric --kol-fg-NN stops instead. ─── */
+
+.text-subtle    { color: var(--kol-fg-subtle); }
+.text-meta      { color: var(--kol-fg-meta); }
+.text-body      { color: var(--kol-fg-body); }
+.text-strong    { color: var(--kol-fg-strong); }
+.text-emphasis  { color: var(--kol-fg-emphasis); }
+
+.hover\:text-subtle:hover    { color: var(--kol-fg-subtle); }
+.hover\:text-meta:hover      { color: var(--kol-fg-meta); }
+.hover\:text-body:hover      { color: var(--kol-fg-body); }
+.hover\:text-strong:hover    { color: var(--kol-fg-strong); }
+.hover\:text-emphasis:hover  { color: var(--kol-fg-emphasis); }

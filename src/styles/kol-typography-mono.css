@@ -1,0 +1,177 @@
+/**
+ * kol-typography-mono.css — Mono typography (JetBrains Mono).
+ *
+ * Two scales, same px stops, same family, distinguished by intent + visual weight:
+ *   .kol-mono-N    — multi-line mono body / values. Weight 400, with leading.
+ *   .kol-helper-N  — single-line labels, eyebrows, group titles. Weight 500,
+ *                    line-height 1, letter-spaced. Renders heavier than
+ *                    .kol-mono-N at the same size — useful for label / value
+ *                    pairs in dense UI (label = helper, value = mono).
+ *
+ * Convention: suffix is the literal px size. .kol-mono-12 IS 12px. No decoder
+ * ring. Inline values inside class definitions; no separate size tokens.
+ *
+ * Italic note: only 500i is bundled (Medium Italic). 400i (Regular Italic) is
+ * deferred until a consumer requires it — italic .kol-mono-N falls back to
+ * synthesized italic until then.
+ *
+ * Architecture: docs/kol-migration/locked/typography-system.md
+ *                docs/kol-migration/typography-proposal.md
+ */
+
+/* =============================================================================
+ * FONT-FACE — JetBrains Mono (4 weights: 400, 500, 500i, 600)
+ * ============================================================================= */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/JetBrainsMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/JetBrainsMono-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/JetBrainsMono-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =============================================================================
+ * FAMILY TOKEN
+ * ============================================================================= */
+
+:root {
+  --kol-font-family-mono: 'JetBrains Mono', monospace;
+}
+
+/* =============================================================================
+ * BASE SCALE — multi-line mono body / values. Weight 400 (regular), with leading.
+ * ============================================================================= */
+
+.kol-mono-8 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 8px;
+  line-height: 12px;
+  font-weight: 400;
+}
+
+.kol-mono-10 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 400;
+}
+
+.kol-mono-12 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.kol-mono-14 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.kol-mono-16 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+.kol-mono-20 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 400;
+}
+
+/* =============================================================================
+ * LABEL SCALE — single-line labels. Weight 500 (medium), no leading,
+ * letter-spaced. Designed for label/value pairs at the same size where the
+ * label needs visual prominence (heavier weight) without size-jumping.
+ * Wider letter-spacing on the smallest two stops for sub-12px readability.
+ * ============================================================================= */
+
+.kol-helper-8 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+}
+
+.kol-helper-10 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+}
+
+.kol-helper-12 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.kol-helper-14 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.kol-helper-16 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.kol-helper-20 {
+  font-family: var(--kol-font-family-mono);
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* =============================================================================
+ * TAILWIND CONTRACT — font-mono utility
+ *
+ * Generates `font-mono` class. Lives here (not in kol-typography.css) so the
+ * mono concerns are co-located. Indirected through --kol-font-family-mono so
+ * a future font swap only edits one place.
+ * ============================================================================= */
+
+@theme {
+  --font-mono: 'JetBrains Mono', monospace;
+}

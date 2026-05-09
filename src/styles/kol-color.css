@@ -1,0 +1,311 @@
+/**
+ * KOL Color System — DS theme layer (brand-neutral).
+ *
+ * Surface tiers, ink-based accent default, ui-state, borders, opacity ramp
+ * re-declarations for surface-inverse contexts. Brand identity (hue ramps,
+ * cream ramp, brand-primary/secondary roles, accent rebind) lives in the
+ * sibling `kol-brand-color.css` and mirrors the `kol-brand` package — loaded
+ * explicitly by `index.css` for this repo (the brand showcase). A scaffolded
+ * project that does NOT pull `kol-brand` skips the brand import and renders
+ * brand-neutral with `--kol-accent-*` defaulting to surface ink.
+ *
+ * Dark mode toggle:
+ *   document.documentElement.setAttribute('data-theme', 'dark')
+ */
+
+/* =============================================================================
+ * LIGHT MODE (Default)
+ * ============================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------------
+   * ABSOLUTES (theme-invariant)
+   * --------------------------------------------------------------------------- */
+
+  --kol-color-absolute-white: #FFFFFF;
+  --kol-color-absolute-black: #000000;
+
+  /* ---------------------------------------------------------------------------
+   * SURFACE (elevation tiers — single role, no container distinction)
+   * --------------------------------------------------------------------------- */
+
+  --kol-surface-primary: #FAFAFA;
+  --kol-surface-on-primary: #121215;
+
+  --kol-surface-secondary: #F2F2F2;
+  --kol-surface-on-secondary: #19191D;
+
+  --kol-surface-tertiary: #FFFFFF;
+  --kol-surface-on-tertiary: #0E0E11;
+
+  --kol-surface-inverse: #0E0E11;
+  --kol-surface-on-inverse: #FCFBF8;
+
+  /* ---------------------------------------------------------------------------
+   * ACCENT (interactive role — buttons, toggles, focus rings)
+   *
+   * Brand-neutral default: points at the surface ink color so the DS works
+   * without a brand layer. kol-brand-color.css overrides these to point at
+   * --brand-primary / --brand-on-primary / a brand-strong stop.
+   * --------------------------------------------------------------------------- */
+
+  --kol-accent-primary:        var(--kol-surface-on-primary);
+  --kol-accent-on-primary:     var(--kol-surface-primary);
+  --kol-accent-primary-strong: color-mix(in srgb, var(--kol-surface-on-primary) 80%, transparent);
+
+  /* ---------------------------------------------------------------------------
+   * UI STATE — error / warning / info / success.
+   * Direct hex (not ramp-dependent). Intentionally not part of the brand layer
+   * so consumers get sensible defaults out of the box.
+   * --------------------------------------------------------------------------- */
+
+  --ui-error:    #B91C1C;
+  --ui-warning:  #EAB308;
+  --ui-info:     #1D4ED8;
+  --ui-success:  #15803D;
+
+  /* ---------------------------------------------------------------------------
+   * BORDER
+   * --------------------------------------------------------------------------- */
+
+  --kol-border-default: color-mix(in srgb, var(--kol-surface-on-primary) 8%, transparent);
+  --kol-border-focus: color-mix(in srgb, var(--kol-accent-primary) 70%, var(--kol-surface-on-primary));
+  --kol-focus-ring: var(--kol-accent-primary);
+}
+
+:root[data-theme="light"] {
+  --ui-error:    #DC2626;
+  --ui-warning:  #CA8A04;
+  --ui-info:     #2563EB;
+  --ui-success:  #16A34A;
+}
+
+/* =============================================================================
+ * DARK MODE
+ * ============================================================================= */
+
+[data-theme="dark"],
+.dark {
+  --kol-surface-primary: #121215;
+  --kol-surface-on-primary: #FAFAFA;
+
+  --kol-surface-secondary: #19191D;
+  --kol-surface-on-secondary: #F8F8F8;
+
+  --kol-surface-tertiary: #0E0E11;
+  --kol-surface-on-tertiary: #FFFFFF;
+
+  --kol-surface-inverse: #FCFBF8;
+  --kol-surface-on-inverse: #0E0E11;
+}
+
+/* =============================================================================
+ * SYSTEM PREFERENCE (Automatic Dark Mode)
+ * ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --kol-surface-primary: #121215;
+    --kol-surface-on-primary: #FAFAFA;
+
+    --kol-surface-secondary: #19191D;
+    --kol-surface-on-secondary: #F8F8F8;
+
+    --kol-surface-tertiary: #0E0E11;
+    --kol-surface-on-tertiary: #FFFFFF;
+
+    --kol-surface-inverse: #FCFBF8;
+    --kol-surface-on-inverse: #0E0E11;
+  }
+}
+
+/* =============================================================================
+ * CONTEXT-AWARE SURFACE INVERSE
+ * ============================================================================= */
+
+.bg-surface-inverse {
+  background-color: var(--kol-surface-inverse);
+  color: var(--kol-surface-on-inverse);
+
+  --kol-surface-primary: var(--kol-surface-inverse);
+  --kol-surface-on-primary: var(--kol-surface-on-inverse);
+  --kol-surface-secondary: var(--kol-surface-secondary);
+  --kol-surface-on-secondary: var(--kol-surface-on-inverse);
+  --kol-surface-tertiary: var(--kol-surface-tertiary);
+  --kol-surface-on-tertiary: var(--kol-surface-on-inverse);
+  --kol-border-default: color-mix(in srgb, var(--kol-surface-on-inverse) 8%, transparent);
+
+  /* Re-declare fg-ramp against on-inverse so opacity tokens flip with surface.
+   * CSS substitutes inner var() at the declaration site, so the :root declarations
+   * bake the on-primary color and don't re-resolve here. Redeclaring here lets every
+   * --kol-fg-* consumer (borders, dividers, dimmed text) automatically contrast-flip. */
+  --kol-fg-01: color-mix(in srgb, var(--kol-surface-on-inverse) 1%, transparent);
+  --kol-fg-02: color-mix(in srgb, var(--kol-surface-on-inverse) 2%, transparent);
+  --kol-fg-04: color-mix(in srgb, var(--kol-surface-on-inverse) 4%, transparent);
+  --kol-fg-08: color-mix(in srgb, var(--kol-surface-on-inverse) 8%, transparent);
+  --kol-fg-12: color-mix(in srgb, var(--kol-surface-on-inverse) 12%, transparent);
+  --kol-fg-16: color-mix(in srgb, var(--kol-surface-on-inverse) 16%, transparent);
+  --kol-fg-24: color-mix(in srgb, var(--kol-surface-on-inverse) 24%, transparent);
+  --kol-fg-32: color-mix(in srgb, var(--kol-surface-on-inverse) 32%, transparent);
+  --kol-fg-40: color-mix(in srgb, var(--kol-surface-on-inverse) 40%, transparent);
+  --kol-fg-48: color-mix(in srgb, var(--kol-surface-on-inverse) 48%, transparent);
+  --kol-fg-64: color-mix(in srgb, var(--kol-surface-on-inverse) 64%, transparent);
+  --kol-fg-80: color-mix(in srgb, var(--kol-surface-on-inverse) 80%, transparent);
+  --kol-fg-88: color-mix(in srgb, var(--kol-surface-on-inverse) 88%, transparent);
+  --kol-fg-96: color-mix(in srgb, var(--kol-surface-on-inverse) 96%, transparent);
+}
+
+/* =============================================================================
+ * UTILITY CLASSES (HEAVILY USED — Based on usage audit)
+ *
+ * - .text-fg-* (594 references) live in kol-opacity.css
+ * - .border-fg-* / .bg-fg-* live in kol-opacity.css
+ *
+ * Below: surface + elevation + basic + state classes that consume the surface
+ * tier directly (not through opacity ramps).
+ * ============================================================================= */
+
+/* ---------------------------------------------------------------------------
+ * Surface Utilities
+ * --------------------------------------------------------------------------- */
+
+.bg-surface-primary {
+  background-color: var(--kol-surface-primary);
+  color: var(--kol-surface-on-primary);
+}
+
+.bg-surface-secondary {
+  background-color: var(--kol-surface-secondary);
+  color: var(--kol-surface-on-secondary);
+}
+
+.bg-surface-tertiary {
+  background-color: var(--kol-surface-tertiary);
+  color: var(--kol-surface-on-tertiary);
+}
+
+.bg-surface-inverse {
+  background-color: var(--kol-surface-inverse);
+  color: var(--kol-surface-on-inverse);
+}
+
+/* ---------------------------------------------------------------------------
+ * Elevation Utilities
+ * --------------------------------------------------------------------------- */
+
+.elevation-base {
+  background-color: var(--kol-surface-primary);
+  color: var(--kol-surface-on-primary);
+}
+
+.elevation-raised {
+  background-color: var(--kol-surface-secondary);
+  color: var(--kol-surface-on-secondary);
+}
+
+.elevation-elevated {
+  background-color: var(--kol-surface-tertiary);
+  color: var(--kol-surface-on-tertiary);
+}
+
+/* ---------------------------------------------------------------------------
+ * Basic Utilities
+ * --------------------------------------------------------------------------- */
+
+.text-auto {
+  color: var(--kol-surface-on-primary);
+}
+
+.text-inverse {
+  color: var(--kol-surface-on-inverse);
+}
+
+.bg-auto {
+  background-color: var(--kol-surface-primary);
+}
+
+.bg-fg {
+  background-color: var(--kol-surface-on-primary);
+}
+
+.border-auto {
+  border-color: var(--kol-border-default);
+}
+
+.divider-auto {
+  border-color: var(--kol-border-default);
+  border-width: 1px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Surface-based Borders (for contrast on bg-fg fills)
+ * --------------------------------------------------------------------------- */
+
+.border-surface {
+  border-color: var(--kol-surface-primary);
+}
+
+.border-surface-08 {
+  border-color: color-mix(in srgb, var(--kol-surface-primary) 8%, transparent);
+}
+
+.border-surface-16 {
+  border-color: color-mix(in srgb, var(--kol-surface-primary) 16%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * State Utilities
+ * --------------------------------------------------------------------------- */
+
+.hover\:border-hover:hover {
+  border-color: var(--kol-border-default);
+}
+
+.focus\:border-focus:focus {
+  border-color: var(--kol-border-focus);
+}
+
+.focus-visible\:border-focus:focus-visible {
+  border-color: var(--kol-border-focus);
+}
+
+.focus-visible\:ring-focus:focus-visible {
+  outline: 2px solid var(--kol-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Absolute Colors
+ * --------------------------------------------------------------------------- */
+
+.bg-absolute-white {
+  background-color: var(--kol-color-absolute-white);
+}
+
+.bg-absolute-black {
+  background-color: var(--kol-color-absolute-black);
+}
+
+.text-absolute-white {
+  color: var(--kol-color-absolute-white);
+}
+
+.text-absolute-black {
+  color: var(--kol-color-absolute-black);
+}
+
+/* =============================================================================
+ * TAILWIND CONTRACT — color exposures (DS layer)
+ *
+ * Tailwind v4 generates utilities from --color-* tokens. UI state lives here
+ * (DS-level). Brand role + brand ramps + cream are registered in
+ * kol-brand-color.css (loaded after this file when client branding is desired).
+ * ============================================================================= */
+
+@theme {
+  /* UI state — conventional Tailwind hexes, disconnected from brand ramps. */
+  --color-ui-error:             var(--ui-error);
+  --color-ui-warning:           var(--ui-warning);
+  --color-ui-info:              var(--ui-info);
+  --color-ui-success:           var(--ui-success);
+}

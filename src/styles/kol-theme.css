@@ -1,0 +1,105 @@
+/**
+ * Kolkrabbi Design System — Unified Theme entry point.
+ *
+ * Cascade order matters — later imports override earlier ones at equal
+ * specificity. Color/opacity primitives load first; typography consumes them;
+ * utilities provide generic helpers; components close the cascade with the
+ * highest-level chrome.
+ *
+ *   1. kol-color       — surface tokens, ramps, brand/accent/status, semantic aliases
+ *   2. kol-opacity     — fg-opacity scale (14 stops × {bg,text,border} × {standard,inverse}
+ *                        × {base,hover}) + 5 text-role tokens/classes
+ *   3. kol-typography  — @font-face, type scale tokens, .kol-prose
+ *   4. kol-utilities   — flex-center, absolute-center, text-balance,
+ *                        breakpoint-padding, sr-only, fullbleed
+ *   5. kol-components  — DS chrome: buttons, toggles, table, etc.
+ *
+ * Phase 5 rename map (from prior file names):
+ *   theme.css             → kol-theme.css       (this file)
+ *   kol-color-simple.css  → kol-color.css       (post-Phase-4a, hex-opacity family removed)
+ *   kol-typography-mono.css → kol-typography.css (post-Phase-4a, type tokens added)
+ *   components.css        → kol-components.css  (Table CSS absorbed from kol-client)
+ *   (NEW)                 → kol-opacity.css     (ported from kol-client Phase 4a)
+ *   (NEW)                 → kol-utilities.css   (curated slice of _new-css/utilities.css)
+ */
+
+@import "./kol-color.css";
+@import "./kol-opacity.css";
+@import "./kol-typography.css";
+@import "./kol-typography-mono.css";
+@import "./kol-utilities.css";
+@import "./kol-components-atoms.css";
+@import "./kol-components-molecules.css";
+@import "./kol-components-organisms.css";
+
+/* Theme-level design tokens */
+:root {
+  /* Spacing scale (4px base) */
+  --kol-spacing-1: 0.25rem;    /* 4px */
+  --kol-spacing-2: 0.5rem;     /* 8px */
+  --kol-spacing-3: 0.75rem;    /* 12px */
+  --kol-spacing-4: 1rem;       /* 16px */
+  --kol-spacing-5: 1.25rem;    /* 20px */
+  --kol-spacing-6: 1.5rem;     /* 24px */
+  --kol-spacing-8: 2rem;       /* 32px */
+  --kol-spacing-10: 2.5rem;    /* 40px */
+  --kol-spacing-12: 3rem;      /* 48px */
+  --kol-spacing-16: 4rem;      /* 64px */
+  --kol-spacing-20: 5rem;      /* 80px */
+  --kol-spacing-24: 6rem;      /* 96px */
+
+  /* Semantic spacing aliases */
+  --kol-spacing-section: var(--kol-spacing-20);
+  --kol-spacing-container: var(--kol-spacing-10);
+  --kol-spacing-gap-sm: var(--kol-spacing-2);
+  --kol-spacing-gap-md: var(--kol-spacing-4);
+  --kol-spacing-gap-lg: var(--kol-spacing-6);
+
+  /* Border radius (4px increments) */
+  --kol-radius-none: 0;
+  --kol-radius-sm: 4px;
+  --kol-radius-md: 8px;
+  --kol-radius-lg: 12px;
+  --kol-radius-xl: 16px;
+  --kol-radius-2xl: 20px;
+  --kol-radius-full: 9999px;
+
+  /* Shadows (subtle elevation) */
+  --kol-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --kol-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --kol-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --kol-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --kol-shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* Transitions (consistent timing) */
+  --kol-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --kol-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --kol-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --kol-transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-index scale */
+  --kol-z-base: 1;
+  --kol-z-dropdown: 10;
+  --kol-z-sticky: 20;
+  --kol-z-overlay: 50;
+  --kol-z-modal: 100;
+  --kol-z-toast: 200;
+  --kol-z-tooltip: 300;
+  --kol-z-nav: 1000;
+
+  /* Opacity values */
+  --kol-opacity-hover: 0.8;
+  --kol-opacity-disabled: 0.5;
+  --kol-opacity-subtle: 0.6;
+  --kol-opacity-loading: 0.7;
+}
+
+/* Dark mode shadow adjustments */
+[data-theme="dark"],
+.dark {
+  --kol-shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.03);
+  --kol-shadow-md: 0 4px 6px rgba(255, 255, 255, 0.05);
+  --kol-shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.08);
+  --kol-shadow-xl: 0 20px 25px rgba(255, 255, 255, 0.1);
+  --kol-shadow-inner: inset 0 2px 4px rgba(255, 255, 255, 0.04);
+}

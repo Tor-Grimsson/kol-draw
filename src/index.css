@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "./styles/kol-theme.css";
+@import "./styles/kol-framework.css";
+@import "./styles/kol-editor.css";
+
+/* kol-draw overrides ───────────────────────────────────────────────
+   Surface-tone separation, with KOL components staying on `surface-primary`
+   (where their default styling is calibrated). Rails inherit the shell's
+   primary background; the canvas drops to `surface-tertiary` (the high-
+   contrast "stage" tone — pure white in light, near-black in dark) so the
+   tone shift demarcates the working surface without any borders. */
+
+.kol-editor-canvas {
+  background-color: var(--kol-surface-tertiary);
+}
+/* Right rail: lock horizontal scroll (controls panel can't push it sideways). */
+.kol-editor-right {
+  overflow-x: hidden;
+}
+.kol-editor-right .kol-editor-rail-body {
+  overflow-x: hidden;
+}
+/* Left rail keeps overflow visible so the sidenav's collapse chevron
+   (positioned at right: -12px on .kol-sidenav-toggle) isn't clipped. */
+
+/* kol-helper-12 ships with `line-height: 1` so it pairs cleanly with
+   precise spacing — but combined with `.truncate` (overflow:hidden) any
+   descender (g, p, q, y, …) gets clipped at the cap-height line-box edge.
+   Loosen line-height locally everywhere these collide. */
+[data-menu-item],
+.kol-compose-layer-main,
+.kol-compose-layer-main > span,
+.kol-compose-layer-row {
+  line-height: 1.5;
+}
+.kol-editor-rail-header {
+  border-bottom: 0;
+}
+
+/* Editor grid mirrors the editor package: 320px left rail / 1fr canvas /
+   320px right rail. The brand SideNav sits OUTSIDE this grid in the
+   kol-brand-layout (sidenav column at --kol-sidenav-w). */
+.kol-editor-grid {
+  grid-template-columns: 320px minmax(0, 1fr) 320px;
+}

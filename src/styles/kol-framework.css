@@ -1,0 +1,1225 @@
+/**
+ * kol-client — site-local structural rules only.
+ *
+ * This file holds layout / positioning / sizing that the Kolkrabbi DS doesn't
+ * cover. Color, typography, borders, and state come from DS utilities
+ * (bg-fg-*, border-fg-*, text-fg-*, bg-surface-*, kol-display-*, kol-heading-*,
+ * kol-text-*, kol-helper-*) on JSX. No `__` BEM, no `color-mix()` for chrome.
+ *
+ * Global rule: border-radius never exceeds 4px.
+ */
+
+html,
+body {
+  background: var(--kol-surface-primary);
+  color: var(--kol-surface-on-primary);
+
+  /* Editor-style app — selection is mostly meaningless on chrome. Default
+   * to non-selectable; opt back in for prose, tables, inputs, code below. */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allowlist — surfaces where reading / copying matters. */
+input, textarea, [contenteditable="true"],
+.kol-prose, .kol-prose *,
+.kol-table, .kol-table *,
+code, pre {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Selection highlight uses brand-primary so it reads on-brand when it appears. */
+::selection {
+  background-color: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+
+:root {
+  --kol-topnav-h: 0px;
+  --kol-sidenav-w: 260px;
+  --kol-sidenav-w-collapsed: 56px;
+  --kol-container-max: 100%;
+
+  /* Opacity tokens (--kol-fg-*) + text-role tokens (--kol-text-*) live in
+     kol-opacity.css — see that file for the full 14-stop scale + inverse tier
+     + hover variants + role utility classes. */
+
+  /* CTA / button transition shortcut (matches prevailing ease curve in site CSS).
+     Distinct from DS --kol-transition-base (which uses a Material cubic-bezier).
+     Intentional: site chrome uses browser-ease for a softer feel. */
+  --kol-t-btn: background 200ms ease, color 200ms ease, border-color 200ms ease;
+
+  /* Stepped page / section / band padding tokens.
+     Used by chrome (topnav, sidenav) and landing bands. Scaled at 768 / 1024
+     breakpoints so one set of rules covers mobile → desktop without clamp(). */
+  --kol-pad-page-x:    20px;
+  --kol-pad-page-y:    64px;
+  --kol-pad-section-x: 20px;
+  --kol-pad-section-y: 48px;
+  --kol-pad-band-y:    56px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --kol-pad-page-x:    32px;
+    --kol-pad-page-y:    96px;
+    --kol-pad-section-x: 32px;
+    --kol-pad-section-y: 64px;
+    --kol-pad-band-y:    80px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --kol-container-max: 1400px;
+    --kol-pad-page-x:    56px;
+    --kol-pad-page-y:    128px;
+    --kol-pad-section-x: 48px;
+    --kol-pad-section-y: 80px;
+    --kol-pad-band-y:    104px;
+  }
+}
+
+@media (min-width: 1280px) { :root { --kol-container-max: 1600px; } }
+
+:root[data-sidenav="collapsed"] { --kol-sidenav-w: var(--kol-sidenav-w-collapsed); }
+
+/* ───── Brand doc layout (sidebar + content) ─────
+   The grid lives in CSS for its dynamic --kol-sidenav-w + transition. */
+
+.kol-brand-layout {
+  display: grid;
+  grid-template-columns: var(--kol-sidenav-w) minmax(0, 1fr);
+  transition: grid-template-columns 180ms ease;
+}
+
+@media (max-width: 1024px) {
+  /* Force rail mode below lg — keep nav accessible, hide panels + labels.
+     User's localStorage expand preference is overridden while viewport is narrow;
+     restored once they cross back over the threshold. */
+  .kol-brand-layout { grid-template-columns: var(--kol-sidenav-w-collapsed) minmax(0, 1fr); }
+  .kol-sidenav-toggle { display: none; }
+  .kol-sidenav-hops { padding: 0 0 16px; margin-bottom: 16px; }
+  .kol-sidenav-hop { padding: 8px 0; justify-content: center; gap: 0; }
+  .kol-sidenav-hop-label { display: none; }
+  .kol-sidenav-body { display: none; }
+}
+
+@media (max-width: 767px) {
+  /* Mobile drawer mode: hide the sidebar from the layout grid entirely.
+     SideNav repositions as a fixed slide-in panel triggered by the hamburger
+     in BrandLayout. Backdrop is the sibling .kol-sidenav-backdrop. */
+  .kol-brand-layout { grid-template-columns: minmax(0, 1fr); }
+  .kol-sidenav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(80vw, 280px);
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+  }
+  .kol-sidenav.is-drawer-open { transform: translateX(0); }
+  /* Restore expanded labels + body inside the open drawer (override the rail rules above). */
+  .kol-sidenav.is-drawer-open .kol-sidenav-hop { padding: 8px 0; justify-content: flex-start; gap: 12px; }
+  .kol-sidenav.is-drawer-open .kol-sidenav-hop-label { display: inline; }
+  .kol-sidenav.is-drawer-open .kol-sidenav-body { display: block; }
+  .kol-brand-layout[data-drawer-open="true"] .kol-sidenav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* SideNav primitives (.kol-sidenav-hop, -hop-icon, -hop-label, -link,
+ * -group) promoted to kol-components-atoms.css 2026-04-30. The .is-collapsed
+ * responsive cascade rules below stay here — they're page-grid concerns,
+ * not component chrome. */
+
+/* ───── SideNav collapsed (rail mode) — overrides inlined hop padding/gap ───── */
+
+.kol-sidenav.is-collapsed .kol-sidenav-hops {
+  padding: 0 0 16px;
+  margin-bottom: 16px;
+}
+
+.kol-sidenav.is-collapsed .kol-sidenav-hop {
+  padding: 8px 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.kol-sidenav.is-collapsed .kol-sidenav-hop-label {
+  display: none;
+}
+
+.kol-sidenav.is-collapsed .kol-sidenav-body {
+  display: none;
+}
+
+/* ───── Page scaffold ───── */
+
+.kol-page {
+  max-width: var(--kol-container-max);
+  margin: 0 auto;
+  padding: 64px var(--kol-pad-section-x);
+}
+
+.kol-page-hero {
+  min-height: 72dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px var(--kol-pad-section-x);
+  max-width: var(--kol-container-max);
+  margin: 0 auto;
+}
+
+/* .kol-page-section-divider promoted to kol-components-atoms.css 2026-04-30. */
+
+.kol-page--fullbleed {
+  max-width: none !important;
+  min-height: 100vh;
+  padding: 64px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ───── Standard 4-col content grid ─────
+   The page-wide grid all chapter content lays out against. Always 4 cols.
+   Rows size to content; children control their own height via aspect-ratio
+   or explicit sizing. Use col-span-N / row-span-N utilities for spans. */
+.kol-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.kol-grid--tight-y { row-gap: 0.75rem; }
+
+/* Editor + compose rail rules moved to src/editor/styles/kol-editor.css.
+   Canvas patterns (.kol-grid-bg, .kol-checker) moved with them. */
+
+@media (max-width: 768px) { .kol-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .kol-grid { grid-template-columns: 1fr; } }
+
+
+/* ───── Asset figure / grid ─────
+   Wrappers (figure margin via Preflight, frame radius/overflow, grid base
+   display+gap+margin) inlined in AssetFigure.jsx + AssetGrid.jsx. CSS retains
+   the responsive column-count variants and the descendant img sizing. */
+
+.kol-asset-figure-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.kol-asset-grid-2col { grid-template-columns: repeat(2, 1fr); }
+.kol-asset-grid-3col { grid-template-columns: repeat(3, 1fr); }
+.kol-asset-grid-4col { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+  .kol-asset-grid-3col,
+  .kol-asset-grid-4col { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .kol-asset-grid-2col,
+  .kol-asset-grid-3col,
+  .kol-asset-grid-4col { grid-template-columns: 1fr; }
+}
+
+/* ───── Mood tile (image + overlay logomark) ─────
+   Wrappers inlined in MoodTile.jsx. CSS retains descendant img positioning
+   (cover-crop the photo) + overlay logo sizing. */
+
+.kol-mood-tile-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kol-mood-tile-overlay .kol-brand-logo {
+  width: 32%;
+  max-width: 180px;
+  display: inline-flex;
+}
+
+.kol-mood-tile-overlay svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ───── Swatch / Ramp (color specimens) ───── */
+
+.kol-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kol-swatch-chip {
+  height: 96px;
+  border-radius: 4px;
+}
+
+.kol-swatch-meta {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-family: var(--kol-font-family-mono, monospace);
+}
+
+.kol-ramp-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 4px;
+}
+
+/* ───── Type sample (brand type specimen) ─────
+   Wrapper padding inlined in TypeSample.jsx; body margin handled by Preflight.
+   CSS retains the adjacent-sibling border-top that separates stacked samples. */
+
+.kol-type-sample + .kol-type-sample {
+  border-top: 1px solid var(--kol-fg-08);
+}
+
+/* Prose moved to DS typography — see kol-typography-mono.css.
+   See docs/documentation/06-framework/06-amendments.md 2026-04-23. */
+
+.kol-prose-indented {
+  padding-left: 32px;
+  border-left: 1px solid var(--kol-fg-16);
+}
+
+.kol-prose pre {
+  margin: 0 0 24px;
+  padding: 16px;
+  border-radius: 4px;
+  font-family: 'Right Grotesk Mono', monospace;
+  font-size: 16px;
+  line-height: 24px;
+  overflow-x: auto;
+}
+
+.kol-prose code {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.kol-prose pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.kol-prose-pullout {
+  padding: 16px 0;
+  margin: 32px 0;
+  border-top: 1px solid var(--kol-fg-08);
+  border-bottom: 1px solid var(--kol-fg-08);
+}
+
+/* ───── Fullscreen overlay ───── */
+
+.kol-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--kol-z-modal, 100);
+  background: color-mix(in srgb, var(--kol-surface-inverse) 88%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.kol-overlay-sheet {
+  position: relative;
+  max-width: var(--kol-container-max);
+  max-height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kol-overlay-sheet img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  display: block;
+}
+
+.kol-overlay-close {
+  position: absolute;
+  top: -48px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--kol-surface-on-inverse) 32%, transparent);
+  color: var(--kol-surface-on-inverse);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.kol-overlay-close:hover {
+  background: color-mix(in srgb, var(--kol-surface-on-inverse) 8%, transparent);
+}
+
+/* ───── Carousel (embla) ───── */
+
+.kol-embla { overflow: hidden; }
+.kol-embla-viewport { overflow: hidden; }
+.kol-embla-container {
+  display: flex;
+  gap: 16px;
+}
+.kol-embla-slide {
+  flex: 0 0 auto;
+  width: clamp(260px, 32vw, 420px);
+}
+
+.kol-embla.is-slides .kol-embla-slide {
+  width: clamp(320px, 72vw, 900px);
+}
+
+.kol-embla-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.kol-embla-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.kol-embla-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ───── Asset carousel + card tiles ─────
+   Section owns the height: the carousel viewport is a fixed box, and cards
+   flex to fill it. Frame holds the image, caption sits under it at natural
+   height. Image mode: default `contain` (artwork/diagrams), opt-in `.is-cover`
+   (photos, screenshots) crops to the top. */
+
+.kol-embla.kol-asset-carousel .kol-embla-viewport {
+  height: 440px;
+}
+
+.kol-embla.kol-asset-carousel.is-slides .kol-embla-viewport {
+  height: 560px;
+}
+
+.kol-embla.kol-asset-carousel .kol-embla-container {
+  height: 100%;
+  align-items: stretch;
+}
+
+.kol-embla.kol-asset-carousel .kol-embla-slide {
+  height: 100%;
+}
+
+.kol-asset-card {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kol-asset-card-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--kol-fg-08);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--kol-fg-04);
+  cursor: zoom-in;
+  transition: border-color 200ms ease;
+}
+
+.kol-asset-card-frame:hover {
+  border-color: var(--kol-fg-24);
+}
+
+.kol-asset-card-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  padding: 16px;
+}
+
+.kol-asset-card-frame.is-cover img {
+  object-fit: cover;
+  object-position: top center;
+  padding: 0;
+}
+
+.kol-asset-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kol-fg-96);
+  pointer-events: none;
+}
+
+.kol-asset-card-overlay .kol-brand-logo { width: 24%; }
+
+/* ───── Website preview ───── */
+
+.kol-website-preview { margin-bottom: 32px; }
+.kol-website-preview .kol-asset-figure-frame {
+  background: var(--kol-fg-02);
+}
+
+/* ───── Brand logo base ───── */
+
+.kol-brand-logo {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.kol-brand-logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ───── Kolkrabbi DS logo base ───── */
+
+.kol-logomark {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.kol-logomark svg {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+
+/* ───── Typography spec card (meta panel + live sample) ─────
+   Wrappers + meta-row grid + responsive layout inlined in TypeSpecCard.jsx.
+   CSS retains the descendant <p> overrides for sample prose (Preflight zeros
+   <p> margin; specs need 16px gap between paragraphs). */
+
+.kol-type-spec-sample p { margin: 0 0 16px; }
+.kol-type-spec-sample p:last-child { margin-bottom: 0; }
+
+/* ───── Exit preview (floating × button on client surfaces) ───── */
+
+.kol-exit-preview {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  background: var(--kol-surface-inverse);
+  color: var(--kol-surface-on-inverse);
+  border: 1px solid color-mix(in srgb, var(--kol-surface-on-inverse) 16%, transparent);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.kol-exit-preview:hover {
+  border-color: color-mix(in srgb, var(--kol-surface-on-inverse) 32%, transparent);
+}
+
+.kol-exit-preview-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.kol-exit-preview-label {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 220ms ease, padding-right 220ms ease;
+  padding-right: 0;
+}
+
+.kol-exit-preview:hover .kol-exit-preview-label {
+  max-width: 120px;
+  padding-right: 20px;
+}
+
+/* ───── Portal footer (simple — Kolkrabbi wordmark + year) ───── */
+
+.kol-portal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  border-top: 1px solid var(--kol-fg-08);
+}
+
+.kol-portal-footer p { margin: 0; }
+
+.kol-portal-footer a { text-decoration: none; transition: opacity 150ms ease; }
+.kol-portal-footer a:hover { opacity: 0.8; }
+
+/* ───── Back link (structural only; use kol-helper-xs uppercase tracking-widest text-fg-64 on JSX) ───── */
+
+.kol-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  text-decoration: none;
+}
+
+/* ───── Code block (rich-text + prose) ───── */
+
+.kol-codeblock {
+  position: relative;
+  margin: 16px 0;
+  border: 1px solid var(--kol-fg-16);
+  border-radius: 4px;
+  background: var(--kol-fg-04);
+  overflow: hidden;
+}
+
+.kol-codeblock pre {
+  margin: 0;
+  padding: 20px 24px 20px 24px;
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-x: auto;
+  color: var(--kol-surface-on-primary);
+}
+
+.kol-codeblock pre code {
+  font-family: inherit;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+.kol-codeblock-lang {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kol-fg-40);
+}
+
+.kol-codeblock-lang + pre {
+  padding-top: 32px;
+}
+
+.kol-codeblock-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--kol-surface-primary) 80%, transparent);
+  border: 1px solid var(--kol-fg-16);
+  border-radius: 3px;
+  color: var(--kol-fg-64);
+  cursor: pointer;
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.kol-codeblock-copy:hover {
+  color: var(--kol-surface-on-primary);
+  border-color: var(--kol-fg-48);
+}
+
+/* ───── Reveal utility ───── */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Text-role utility classes (.text-emphasis/.text-lede/.text-body/.text-meta/.text-subtle
+   + hover variants) and .hover:border-fg-* variants live in kol-opacity.css. */
+/**
+ * foundations.css — /foundations page specific styles.
+ *
+ * Color anatomy spectrum, color tokens table, and combo lab rules.
+ * Portal chrome (sidebar, topnav, page scaffold) stays in app.css.
+ */
+
+/* ───── Foundations · typography specimens ─────
+   Wrappers fully inlined in TypographySections.jsx. */
+
+/* ───── Combo Lab layout primitives — shared structure classes ───── */
+
+.kol-combo-frame {
+  border-radius: 4px;
+  overflow: hidden;
+  transition: background-color 400ms ease, border-color 400ms ease;
+}
+
+.kol-combo-slab {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  transition: background-color 400ms ease, color 400ms ease;
+}
+
+.kol-combo-slab--end     { justify-content: flex-end; }
+.kol-combo-slab--between { justify-content: space-between; }
+
+.kol-combo-label {
+  font-family: 'Right Grotesk Compact', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kol-combo-number {
+  font-family: 'Right Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0.02em;
+}
+
+.kol-combo-stage--fill {
+  height: 100%;
+  min-height: 360px;
+  width: 100%;
+}
+
+.kol-combo-logo {
+  display: inline-flex;
+  color: currentColor;
+}
+
+/* 60 / 30 / 10 */
+.kol-combo-stage--ratio { display: flex; }
+.kol-combo-stage--ratio > :nth-child(1) { flex: 1; }
+.kol-combo-stage--ratio > :nth-child(2) { flex: 3; }
+.kol-combo-stage--ratio > :nth-child(3) { flex: 6; }
+
+/* Tower */
+.kol-combo-stage--tower {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+.kol-combo-stage--tower > * { flex: 1; }
+
+/* Quad split */
+.kol-combo-stage--quad { display: flex; }
+.kol-combo-stage--quad > * { flex: 1; }
+
+.kol-combo-quad-col {
+  display: flex;
+  flex-direction: column;
+}
+.kol-combo-quad-col > * { flex: 1; }
+
+/* Card row */
+.kol-combo-stage--card-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 360px;
+  width: 100%;
+}
+
+.kol-combo-card {
+  flex: 1;
+  min-height: 240px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 400ms ease, color 400ms ease;
+}
+
+.kol-combo-card--end     { justify-content: flex-end; }
+.kol-combo-card--between { justify-content: space-between; }
+
+/* Stripe row */
+.kol-combo-stage--stripe-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 360px;
+  width: 100%;
+}
+
+.kol-combo-stripe-row {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  width: 100%;
+}
+
+.kol-combo-stripe-bar {
+  display: flex;
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.kol-combo-stripe-seg { transition: background-color 400ms ease; }
+.kol-combo-stripe-seg--6 { flex: 6; }
+.kol-combo-stripe-seg--3 { flex: 3; }
+.kol-combo-stripe-seg--1 { flex: 1; }
+
+.kol-combo-stripe-group { display: flex; }
+.kol-combo-stripe-group--3 { flex: 3; }
+.kol-combo-stripe-group--1 { flex: 1; }
+
+.kol-combo-stripe-neutral {
+  border-top: 1px solid var(--stripe-rule, transparent);
+  border-bottom: 1px solid var(--stripe-rule, transparent);
+}
+
+.kol-combo-stripe-accent-border {
+  border: 1.73px solid var(--stripe-accent, transparent);
+}
+
+.kol-combo-stripe-method {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'Right Grotesk Compact', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 100%;
+  text-transform: uppercase;
+  color: white;
+  pointer-events: none;
+}
+
+/* Applied card */
+.kol-combo-stage--applied {
+  display: flex;
+  height: 100%;
+  min-height: 360px;
+  width: 100%;
+}
+
+.kol-combo-applied-plate {
+  flex: 2;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background-color 400ms ease, color 400ms ease;
+}
+
+.kol-combo-applied-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.kol-combo-applied-surface { flex: 3; }
+.kol-combo-applied-band--lg { flex: 2; }
+.kol-combo-applied-band--sm { flex: 1; }
+.kol-combo-applied-band { transition: background-color 400ms ease; }
+
+.kol-combo-applied-accent-strip {
+  display: flex;
+  gap: 8px;
+}
+
+.kol-combo-applied-accent-chip {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  transition: background-color 400ms ease;
+}
+
+/* ───── Foundations · combo lab ───── */
+
+.kol-combo-lab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 24px;
+  border: 1px solid var(--kol-fg-08);
+  border-radius: 4px;
+  background: var(--kol-fg-02);
+}
+
+.kol-combo-controls { margin-bottom: 24px; }
+
+.kol-combo-stage-wrap {
+  flex: 1;
+  margin-bottom: 24px;
+  padding: 32px;
+  background: var(--kol-fg-02);
+  border-radius: 4px;
+  min-height: 440px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.kol-combo-stage-anim {
+  width: 100%;
+  height: 100%;
+  animation: kol-combo-fade 260ms ease;
+  display: flex;
+  align-items: stretch;
+}
+
+.kol-combo-stage-anim > * { width: 100%; height: 100%; }
+
+/* In fullbleed mode, let the lab fill the section */
+.kol-page--fullbleed .kol-combo-lab { flex: 1; }
+.kol-page--fullbleed .kol-combo-stage-wrap { min-height: 520px; }
+
+@keyframes kol-combo-fade {
+  from { opacity: 0.2; transform: translateY(6px); }
+  to   { opacity: 1;   transform: none; }
+}
+
+.kol-combo-readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--kol-fg-08);
+}
+
+/* Combo Lab — control rows (Layout / Palette / Logo selectors) */
+.kol-combo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.kol-combo-row-label { min-width: 72px; }
+
+.kol-combo-row-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kol-combo-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.kol-combo-footer-desc { flex: 1; }
+
+.kol-combo-randomize {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--kol-fg-80);
+  border: 1px solid var(--kol-fg-16);
+  border-radius: 4px;
+  font-family: var(--kol-font-family-mono, monospace);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.kol-combo-randomize:hover {
+  color: var(--kol-surface-on-primary);
+  border-color: var(--kol-fg-48);
+  background: var(--kol-fg-04);
+}
+
+/* Combo Lab — live palette readout rows */
+.kol-combo-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.kol-combo-swatch-chip {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  transition: background 400ms ease;
+}
+
+.kol-combo-swatch-label {
+  min-width: 88px;
+  font-weight: 600;
+}
+
+.kol-combo-swatch-hex {
+  font-family: var(--kol-font-family-mono, monospace);
+  text-transform: uppercase;
+}
+
+.kol-combo-summary { margin-top: 16px; }
+
+/* ═════════════════════════════════════════════════════════════════════
+   SpectrumGrid — matrix color-token grid (9 ramps × 10 stops)
+   ═════════════════════════════════════════════════════════════════════ */
+
+.kol-spectrum-grid {
+  display: grid;
+  grid-template-columns: 100px repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+}
+
+.kol-spectrum-grid--loading {
+  min-height: 400px;
+  background: var(--kol-fg-02);
+  border-radius: 6px;
+}
+
+.kol-spectrum-grid-head {
+  display: contents;
+}
+
+.kol-spectrum-grid-corner {
+  grid-column: 1;
+}
+
+.kol-spectrum-grid-stop-label {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--kol-fg-48);
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.kol-spectrum-grid-row {
+  display: contents;
+}
+
+.kol-spectrum-grid-row-label {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--kol-surface-on-primary);
+  align-self: center;
+  padding-right: 12px;
+}
+
+.kol-spectrum-grid-row-label::first-letter {
+  text-transform: uppercase;
+}
+
+.kol-spectrum-grid-cell {
+  position: relative;
+  aspect-ratio: 5 / 3;
+  min-width: 0;
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 120ms ease;
+}
+
+.kol-spectrum-grid-cell-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.kol-spectrum-grid-cell:hover {
+  transform: scale(1.04);
+}
+
+.kol-spectrum-grid-cell-stop {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.kol-spectrum-grid-cell-hex {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 9px;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+@media (max-width: 900px) {
+  .kol-spectrum-grid {
+    grid-template-columns: 72px repeat(10, minmax(0, 1fr));
+    gap: 2px;
+  }
+  .kol-spectrum-grid-cell {
+    padding: 4px;
+  }
+  .kol-spectrum-grid-cell-hex {
+    display: none;
+  }
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════
+   Color Anatomy — token composition samples
+
+   Wrappers inlined in ColorAnatomy.jsx; figure margin via Preflight.
+   CSS retains the descendant typography for figcaption + inline <code>.
+   ═════════════════════════════════════════════════════════════════════ */
+
+.kol-anatomy-sample figcaption {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--kol-fg-48);
+  font-style: italic;
+}
+
+.kol-anatomy-sample code {
+  font-family: var(--kol-font-family-mono, monospace);
+  font-size: 11px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  padding: 1px 4px;
+  border-radius: 3px;
+  opacity: 1;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════
+   Accordion — collapsible panel group
+
+   Wrapper, panel borders, trigger button reset, title/meta/chevron typography
+   all inlined in Accordion.jsx. CSS retains the two state cascades:
+   - .is-open chevron color flip
+   - :has(meta) chevron margin reset (so meta + chevron sit together)
+   ═════════════════════════════════════════════════════════════════════ */
+
+.kol-accordion-panel.is-open .kol-accordion-chevron {
+  color: var(--kol-surface-on-primary);
+}
+
+.kol-accordion-trigger:has(.kol-accordion-meta) .kol-accordion-chevron {
+  margin-left: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   AssetPlaceholder — deliberate missing/pending fallback frame
+   Wrappers + label typography inlined in AssetPlaceholder.jsx.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ═════════════════════════════════════════════════════════════════════
+   Graphic wrapper
+
+   Base wrapper inlined in Graphic.jsx. CSS retains:
+   - descendant SVG sizing (svg comes from dangerouslySetInnerHTML — no
+     way to apply utility classes inside the raw markup)
+   - .kol-graphic--native modifier (opt-in: respect SVG's intrinsic
+     width/height attributes instead of the default fluid 100%)
+   ═════════════════════════════════════════════════════════════════════ */
+
+.kol-graphic svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.kol-graphic--native { width: auto; }
+.kol-graphic--native svg { width: auto; height: auto; }
+
+/* Image wrapper inlined in Image.jsx. Graphics registry tiles
+   (.kol-graphic-tile) deleted — zero JSX consumers. */
+
+/* ═════════════════════════════════════════════════════════════════════
+   Logo subsections — consistent rhythm inside sections
+
+   Wrappers + subhead title typography inlined in Logo.jsx (SubSection fn).
+   CSS retains the descendant <p> rule for body prose (Preflight zeros <p>
+   margin; logo-section paragraphs need explicit typography + measure cap).
+   ═════════════════════════════════════════════════════════════════════ */
+
+.kol-logo-subsection-body p {
+  font-family: var(--kol-font-family-mono);
+  font-size: var(--kol-text-body-03);
+  line-height: 1.6;
+  color: var(--kol-fg-64);
+  max-width: 70ch;
+  margin: 0;
+}
+
+/* .kol-checker + .kol-grid-bg — moved to src/editor/styles/kol-editor.css */
