@@ -39,8 +39,6 @@ const OP_MAP = {
 }
 
 const MAX_DEPTH = 8
-const CREASE_ANGLE_RAD = (30 * Math.PI) / 180
-const COS_CREASE = Math.cos(CREASE_ANGLE_RAD)
 
 const EMPTY_MESH = Object.freeze({ vertices: [], edges: [], faces: [] })
 
@@ -158,7 +156,9 @@ const geometryToMesh = (geom) => {
     }
   }
 
-  // Edge → triangle adjacency for feature-edge detection.
+  // Edge → triangle adjacency. Each edge maps to its endpoint indices
+  // and the list of triangles that contain it; used both for feature-
+  // edge detection AND for flood-filling coplanar triangle groups.
   const edgeMap = new Map()
   const addEdge = (i, j, t) => {
     const lo = i < j ? i : j
@@ -180,6 +180,49 @@ const geometryToMesh = (geom) => {
     addEdge(c, a, t)
   }
 
+  // Triangle adjacency: for each pair of tris sharing a 2-tri edge,
+  // record both directions. Used by the coplanar flood-fill below.
+  const triAdj = new Array(triCount)
+  for (let i = 0; i < triCount; i++) triAdj[i] = []
+  for (const e of edgeMap.values()) {
+    if (e.tris.length === 2) {
+      triAdj[e.tris[0]].push(e.tris[1])
+      triAdj[e.tris[1]].push(e.tris[0])
+    }
+  }
+
+  // Flood-fill triangles into coplanar groups. Two adjacent tris belong
+  // to the same group when their normals are nearly parallel (dot ≈ 1)
+  // OR nearly anti-parallel (dot ≈ -1) — three-bvh-csg sometimes
+  // outputs flipped winding on interior coplanar faces. Threshold tuned
+  // tight (cos 8° ≈ 0.99) so that coplanar tris with FP noise still
+  // group together but a real 30° crease doesn't accidentally fold in.
+  const COS_COPLANAR = 0.99
+  const groupOf = new Int32Array(triCount).fill(-1)
+  let groupCount = 0
+  for (let seed = 0; seed < triCount; seed++) {
+    if (groupOf[seed] !== -1) continue
+    const gid = groupCount++
+    const stack = [seed]
+    while (stack.length) {
+      const ti = stack.pop()
+      if (groupOf[ti] !== -1) continue
+      groupOf[ti] = gid
+      const n0 = triNormals[ti]
+      for (const adj of triAdj[ti]) {
+        if (groupOf[adj] !== -1) continue
+        const n1 = triNormals[adj]
+        const dot = n0[0] * n1[0] + n0[1] * n1[1] + n0[2] * n1[2]
+        if (Math.abs(dot) > COS_COPLANAR) stack.push(adj)
+      }
+    }
+  }
+
+  // Feature edges = edges that AREN'T interior to a coplanar group.
+  // - 1 adjacent tri (boundary): keep
+  // - 2 adjacent tris in DIFFERENT groups: keep (real crease)
+  // - 2 adjacent tris in the SAME group: hide (interior triangulation)
+  // - 3+ adjacent tris (non-manifold): keep so the anomaly is visible
   const edges = []
   for (const e of edgeMap.values()) {
     if (e.tris.length === 1) {
@@ -187,14 +230,11 @@ const geometryToMesh = (geom) => {
       continue
     }
     if (e.tris.length === 2) {
-      const n0 = triNormals[e.tris[0]]
-      const n1 = triNormals[e.tris[1]]
-      const dot = n0[0] * n1[0] + n0[1] * n1[1] + n0[2] * n1[2]
-      if (dot < COS_CREASE) edges.push([e.i, e.j])
+      if (groupOf[e.tris[0]] !== groupOf[e.tris[1]]) {
+        edges.push([e.i, e.j])
+      }
       continue
     }
-    // Non-manifold (3+ adjacent tris) — keep as feature edge so the
-    // anomaly is visible rather than silently dropped.
     edges.push([e.i, e.j])
   }
 

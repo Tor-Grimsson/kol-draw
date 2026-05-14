@@ -281,6 +281,9 @@ function DeformedGeometry({ shape }) {
 function Geometry({ shape }) {
   const kind = shape.kind || 'box'
   const [sx, sy, sz] = shape.size
+  // Frozen-mesh shapes (flattened CSGs) carry the actual vertex/face data
+  // in `params` — DeformedGeometry consumes buildMesh output.
+  if (kind === 'mesh') return <DeformedGeometry shape={shape} />
   // Deformed shapes (node-mode vertex edits) need a custom geometry
   // sourced from the actual mesh vertices — the primitive geometries
   // below only know about size, not vertexOffsets.

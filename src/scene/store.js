@@ -5,6 +5,7 @@ import { makeCuboid, IDENT3 } from '../math/cuboid.js'
 import { add3, scale3 } from '../math/vec.js'
 import { ALL_INSERT_PRESETS, SCENE_PRESETS } from './presets.js'
 import { validateVarName } from './expr.js'
+import { buildCsg } from '../math/csg.js'
 
 /**
  * @typedef {'1pt'|'2pt'|'3pt'|'4pt'|'5pt'|'stereo'|'equi'|'ortho'} PerspectiveMode
@@ -328,6 +329,59 @@ export const useScene = create(persist((set) => ({
       }
     }),
 
+  /** Flatten a csg shape into a frozen `kind: 'mesh'` shape — the boolean
+   *  result becomes a regular shape (translate / rotate / scale work
+   *  normally) that no longer references operands. Operands stay in the
+   *  scene at their current visibility (typically hidden after combine);
+   *  the user can delete or unhide manually. Stored vertices are local-
+   *  space relative to the result mesh's centroid so center / rotation
+   *  apply naturally. The original csg id is preserved so selection /
+   *  layer ordering survive the flatten. */
+  flattenCsg: (id) => set((s) => {
+    const csg = s.cuboids.find((c) => c.id === id)
+    if (!csg || csg.kind !== 'csg') return s
+    const shapesById = new Map()
+    for (const c of s.cuboids) shapesById.set(c.id, c)
+    const mesh = buildCsg(csg, shapesById)
+    if (!mesh.vertices.length || !mesh.faces.length) return s
+    // Centroid of result mesh = mean of vertex positions. Stored verts
+    // are translated to be local to the centroid; the new shape's
+    // `center` carries the world position so transform actions behave
+    // like any other shape.
+    const c = [0, 0, 0]
+    for (const v of mesh.vertices) {
+      c[0] += v[0]; c[1] += v[1]; c[2] += v[2]
+    }
+    c[0] /= mesh.vertices.length
+    c[1] /= mesh.vertices.length
+    c[2] /= mesh.vertices.length
+    const localVerts = mesh.vertices.map((v) => [v[0] - c[0], v[1] - c[1], v[2] - c[2]])
+    const localFaces = mesh.faces.map((f) => ({
+      vertexIndices: f.vertexIndices,
+      normal: f.normal,
+      centroid: [f.centroid[0] - c[0], f.centroid[1] - c[1], f.centroid[2] - c[2]],
+    }))
+    const past = [...s.history.past, snap(s)]
+    if (past.length > HISTORY_CAP) past.shift()
+    const meshShape = {
+      kind: 'mesh',
+      id: csg.id,
+      center: c,
+      size: [1, 1, 1],
+      rotation: IDENT3,
+      ...(csg.style ? { style: { ...csg.style } } : {}),
+      params: {
+        vertices: localVerts,
+        edges: mesh.edges,
+        faces: localFaces,
+      },
+    }
+    return {
+      cuboids: s.cuboids.map((sh) => (sh.id === csg.id ? meshShape : sh)),
+      history: { past, future: [] },
+    }
+  }),
+
   /** Build a CSG (boolean) shape from the current 2-shape selection.
    *  Hides both operands so the canvas shows only the result; selects
    *  the new csg. Reject when selection isn't exactly two solid-kind
@@ -459,6 +513,19 @@ export const useScene = create(persist((set) => ({
             if (a.out) out.out = [a.out[0] * factor, a.out[1] * factor, a.out[2] * factor]
             return out
           }),
+        }
+      }
+      // Frozen-mesh shapes scale their stored local vertices + face
+      // centroids; size is inert for them, but the buttons should still
+      // do the right thing (uniform scale around the shape's center).
+      if (c.kind === 'mesh' && c.params?.vertices) {
+        next.params = {
+          ...c.params,
+          vertices: c.params.vertices.map((v) => [v[0] * factor, v[1] * factor, v[2] * factor]),
+          faces: (c.params.faces || []).map((f) => ({
+            ...f,
+            centroid: [f.centroid[0] * factor, f.centroid[1] * factor, f.centroid[2] * factor],
+          })),
         }
       }
       return next

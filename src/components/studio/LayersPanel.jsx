@@ -29,6 +29,7 @@ const KIND_ICON = {
   arc:        'shape-sphere',
   polyline:   'shape-sphere',
   csg:        'shape-csg',
+  mesh:       'shape-cube',
   light:      'shape-sphere',
   background: 'layout',
 }

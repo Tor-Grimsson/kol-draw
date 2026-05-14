@@ -227,6 +227,7 @@ function SvgView() {
   const setPenDraft = useScene((s) => s.setPenDraft)
   const finishPenDraft = useScene((s) => s.finishPenDraft)
   const setSelection = useScene((s) => s.setSelection)
+  const toggleSelection = useScene((s) => s.toggleSelection)
   // Local visual state for the marquee rectangle. Storing this here (vs the
   // global zustand store) means drag-tick updates re-render only SvgView,
   // not every other subscriber.
@@ -283,6 +284,14 @@ function SvgView() {
     const cub = cuboids.find((c) => c.id === id)
     if (!cub) return
     e.stopPropagation()
+    // Shift+click on a shape's face — toggle in/out of selection. Standard
+    // editor convention (Photoshop / Figma / Illustrator): shift adds, or
+    // removes if already selected. No drag setup; user does multi-select
+    // first, then a follow-up plain drag moves the group.
+    if (e.shiftKey) {
+      toggleSelection(id)
+      return
+    }
     // Multi-drag detection: if the clicked shape is already part of a
     // multi-selection, drag ALL selected shapes together. Clicking a
     // shape outside the current selection replaces the selection
@@ -290,27 +299,14 @@ function SvgView() {
     const wasInSel = selectedIds.includes(id)
     const dragIds = wasInSel && selectedIds.length > 1 ? selectedIds : [id]
     if (!wasInSel) setSelectedCuboid(id)
-    // Node tool — face-click selects only. No body-translate, no rotate-via-
-    // shift. The user works through anchor / corner / tangent handles
-    // instead. Standard V (select) vs A (direct-select) divergence.
+    // Node tool — face-click selects only. No body-translate.
+    // The user works through anchor / corner / tangent handles instead.
+    // Standard V (select) vs A (direct-select) divergence.
     if (tool === 'node') return
     // CSG shapes have an identity center / rotation — moving them via face
     // drag wouldn't visually do anything (the result mesh is in world
     // space). Click selects; transform the result by editing the operands.
     if (cub.kind === 'csg') return
-    // Shift held → rotate the object; otherwise → translate at constant depth.
-    if (e.shiftKey) {
-      e.currentTarget.setPointerCapture(e.pointerId)
-      dragRef.current = {
-        kind: 'rotate',
-        id,
-        startRotation: cub.rotation ?? [0, 0, 0],
-        startClient: [e.clientX, e.clientY],
-        captureEl: e.currentTarget,
-        pointerId: e.pointerId,
-      }
-      return
-    }
     const depth = depthForKind(cub.center, camera, kind)
     if (depth <= 1e-6) return // bail before claiming pointer capture
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -1020,6 +1016,20 @@ function SvgView() {
           })
           patch.params = nextParams
         }
+        if (t.startParams && t.startParams.vertices) {
+          // Frozen-mesh shapes — scale local vertices + face centroids
+          // around their own origin. The shape's center moves outward
+          // from the pivot via the existing patch.center logic.
+          const nextParams = { ...(patch.params ?? t.startParams) }
+          nextParams.vertices = t.startParams.vertices.map((v) =>
+            [v[0] * factor, v[1] * factor, v[2] * factor],
+          )
+          nextParams.faces = (t.startParams.faces || []).map((f) => ({
+            ...f,
+            centroid: [f.centroid[0] * factor, f.centroid[1] * factor, f.centroid[2] * factor],
+          }))
+          patch.params = nextParams
+        }
         updateCuboid(t.id, patch)
       }
     } else if (drag.kind === 'corner') {
@@ -1477,7 +1487,7 @@ function SvgView() {
           // sampled points to every VP would be a noise field, not a
           // useful overlay. csg results have many irregular vertices for
           // the same reason — skip.
-          .filter((c) => c.kind !== 'arc' && c.kind !== 'polyline' && c.kind !== 'csg')
+          .filter((c) => c.kind !== 'arc' && c.kind !== 'polyline' && c.kind !== 'csg' && c.kind !== 'mesh')
           .map((c) => (
             <CuboidConstructionLines
               key={`cons-${c.id}`}
@@ -1756,9 +1766,11 @@ function SvgView() {
 
       {tool !== 'scale' && visibleCuboids
         // Corner-resize handles use box-style 8-vertex topology with
-        // opposite-vertex anchoring. Linework shapes (arcs, polylines) use
-        // free vertex lists where that pairing has no meaning.
-        .filter((c) => c.kind !== 'arc' && c.kind !== 'polyline')
+        // opposite-vertex anchoring. Linework shapes (arcs, polylines)
+        // use free vertex lists where that pairing has no meaning;
+        // csg / mesh shapes have arbitrary vertex counts and no axis-
+        // aligned bounds → handles are meaningless.
+        .filter((c) => c.kind !== 'arc' && c.kind !== 'polyline' && c.kind !== 'csg' && c.kind !== 'mesh')
         .flatMap((c) =>
           verticesOf(c).map((v, i) => {
             const ip = project(v, camera, kind)

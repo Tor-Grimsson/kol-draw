@@ -19,7 +19,7 @@ import { buildCsg } from './csg.js'
  * shape carries identity center / rotation — its mesh verts are already
  * world-space.
  *
- * @typedef {'box'|'pyramid'|'prism'|'cylinder'|'sphere'|'arc'|'polyline'|'csg'} ShapeKind
+ * @typedef {'box'|'pyramid'|'prism'|'cylinder'|'sphere'|'arc'|'polyline'|'csg'|'mesh'} ShapeKind
  *
  * @typedef {object} Shape
  * @property {ShapeKind} kind
@@ -407,6 +407,36 @@ const buildPolyline = (s) => {
 }
 
 /**
+ * Frozen-mesh shape: stored `params.vertices` are LOCAL-space vec3 array,
+ * `params.edges` and `params.faces` reference indices into that array.
+ * Built by `flattenCsg` after a boolean evaluation; behaves like a regular
+ * shape (translate / rotate / scale all work) but the geometry no longer
+ * references operands. Inspector treats it like a "primitive without size"
+ * — Position + Scale + Style apply, W/H/D doesn't.
+ */
+const buildMeshShape = (s) => {
+  const p = s.params || {}
+  const baseVerts = p.vertices || []
+  const baseEdges = p.edges || []
+  const baseFaces = p.faces || []
+  const M = s.rotation || IDENT3
+  const [cx, cy, cz] = s.center
+  const verts = baseVerts.map((v) => {
+    const r = applyMat3(M, v)
+    return [cx + r[0], cy + r[1], cz + r[2]]
+  })
+  const faces = baseFaces.map((f) => {
+    const cr = applyMat3(M, f.centroid)
+    return {
+      vertexIndices: f.vertexIndices,
+      normal: applyMat3(M, f.normal),
+      centroid: [cx + cr[0], cy + cr[1], cz + cr[2]],
+    }
+  })
+  return { vertices: verts, edges: baseEdges, faces }
+}
+
+/**
  * Internal: kind-dispatched mesh builder for any non-csg shape, with the
  * `vertexOffsets` post-pass applied. Also used by `csg.js` to resolve
  * operand geometry without going through the public `buildMesh` (which
@@ -416,6 +446,7 @@ const buildPolyline = (s) => {
  * @returns {Mesh}
  */
 export const buildMeshBase = (s) => {
+  if (s.kind === 'mesh') return buildMeshShape(s)
   const base = (() => {
     switch (s.kind) {
       case 'pyramid': return buildPyramid(s)

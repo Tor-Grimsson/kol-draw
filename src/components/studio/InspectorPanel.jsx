@@ -117,6 +117,7 @@ function CsgFields({ cuboid }) {
   const cuboids = useScene((s) => s.cuboids)
   const updateCuboid = useScene((s) => s.updateCuboid)
   const removeCuboid = useScene((s) => s.removeCuboid)
+  const flattenCsg = useScene((s) => s.flattenCsg)
   const operator = cuboid.params?.operator ?? 'union'
   const operandIds = cuboid.params?.operandIds ?? []
   const [idA, idB] = operandIds
@@ -205,14 +206,24 @@ function CsgFields({ cuboid }) {
         />
       </LabeledControl>
 
-      <button
-        type="button"
-        onClick={() => removeCuboid(cuboid.id)}
-        className="kol-helper-12 px-2 h-7 rounded border border-fg-08 text-meta hover:text-emphasis self-start mt-3"
-        title="Delete this csg, restore operand visibility"
-      >
-        Unlink
-      </button>
+      <div className="flex items-center gap-1.5 mt-3">
+        <button
+          type="button"
+          onClick={() => flattenCsg(cuboid.id)}
+          className="kol-helper-12 px-2 h-7 rounded border border-fg-08 text-meta hover:text-emphasis"
+          title="Bake this boolean into a regular shape — operands stay (hidden); the result becomes a mesh that translates / rotates / scales like a primitive."
+        >
+          Flatten
+        </button>
+        <button
+          type="button"
+          onClick={() => removeCuboid(cuboid.id)}
+          className="kol-helper-12 px-2 h-7 rounded border border-fg-08 text-meta hover:text-emphasis"
+          title="Delete this csg, restore operand visibility"
+        >
+          Unlink
+        </button>
+      </div>
     </>
   )
 }
@@ -412,6 +423,11 @@ function InspectorBody() {
             </>
           ) : kind === 'polyline' ? (
             <PolylineFields cuboid={cuboid} setParam={setParam} />
+          ) : kind === 'mesh' ? (
+            // Frozen-mesh shapes (flattened CSGs): no axis-aligned size,
+            // no kind-specific params; Scale buttons + Style apply
+            // uniformly via the local-vertex transform in `scaleShape`.
+            null
           ) : (
             <>
               <div className="kol-helper-10 uppercase text-meta mt-3">Size</div>
